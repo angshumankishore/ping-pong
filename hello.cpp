@@ -18,10 +18,14 @@ struct Paddle{
     float width;
     float height; 
     float speed; 
+    Rectangle GetRect(){
+        return Rectangle{positionX - width/2, positionY - height/2, 10, 100}; 
+    }
     void Draw(){
-        DrawRectangle(positionX - width/2, positionY-height/2, 10, 100, WHITE); 
+        DrawRectangle(positionX - width/2, positionY - height/2, 10, 100, WHITE);
     }
 };
+const char *winnertext = nullptr; 
 
 int main() {
 
@@ -77,7 +81,7 @@ int main() {
         }
         //move the paddles 
         if(IsKeyDown(KEY_W)){
-            if(leftPaddle.positionY == )
+            
             leftPaddle.positionY -= leftPaddle.speed*GetFrameTime();
         }
         if(IsKeyDown(KEY_S)){
@@ -89,10 +93,42 @@ int main() {
         if(IsKeyDown(KEY_DOWN)){
             rightPaddle.positionY += rightPaddle.speed*GetFrameTime();
         }
+        if(CheckCollisionCircleRec(Vector2{ball.positionX,ball.positionY},ball.radius,rightPaddle.GetRect())){
+            if(ball.speedX > 0){
+                ball.speedX *= -1.1f; 
+                ball.speedY += (ball.positionY - rightPaddle.positionY)/(rightPaddle.height/2)*(-ball.speedX);
+            }
+            
+        }
+        if(CheckCollisionCircleRec(Vector2{ball.positionX,ball.positionY},ball.radius,leftPaddle.GetRect())){
+            if(ball.speedX < 0){
+                ball.speedX *= -1.1f; 
+                ball.speedY += (ball.positionY - leftPaddle.positionY)/(leftPaddle.height/2)*(ball.speedX);
+            }
+            
+        }
+        if(ball.positionX < 0){
+            winnertext = "Right Player Wins!";
+        }
+        if(ball.positionX > GetScreenWidth()){
+            winnertext = "Left Player Wins!";
+        }
+
         //drawing a circle 
         ball.Draw();
         leftPaddle.Draw();
         rightPaddle.Draw();
+
+        if(winnertext != nullptr){
+            DrawText(winnertext, GetScreenWidth()/2 - MeasureText(winnertext, 20)/2, GetScreenHeight()/2 - 10, 20, WHITE);
+        }
+        if(winnertext && IsKeyPressed(KEY_SPACE)){
+            winnertext = nullptr; 
+            ball.positionX = GetScreenWidth()/2;
+            ball.positionY = GetScreenHeight()/2;
+            ball.speedX = 100; 
+            ball.speedY = 300; 
+        }
         
 
         DrawFPS(10,10); 
